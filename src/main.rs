@@ -1,12 +1,12 @@
 mod statistic;
 
-use envfile::EnvFile;
 use log::{info, debug};
 use opentelemetry::trace::TracerProvider;
 use tracing_subscriber::layer::SubscriberExt;
-use std::path::{Path, PathBuf};
+use std::path::Path;
 use std::sync::Arc;
 use std::sync::atomic::{AtomicUsize, Ordering};
+use dotenv::dotenv;
 use opentelemetry::global;
 use opentelemetry_sdk::propagation::TraceContextPropagator;
 use opentelemetry_otlp::WithExportConfig;
@@ -17,33 +17,25 @@ use crate::statistic::{ statistic, statistic_file, TypeQuery, CODE};
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    dotenv().ok();
     log_and_tracing()?;
     info!("STARTING");
 
-    let env =
-        EnvFile::new(Path::new(".env")).unwrap_or_else(|_| {
-            debug!("Archivo .env no encontrado, se utilizará una configuración vacía.");
-            EnvFile {
-                path: PathBuf::from(".env"),              // Se agrega el campo `path`
-                store: std::collections::BTreeMap::new(), // `data` se cambia a `store`
-            }
-        });
+    let java_src_path_str = env::var("JAVA_SRC");
 
-    let java_src_path_str = env.get("JAVA_SRC");
-
-    if let Some(path_str) = java_src_path_str {
-        let path = Path::new(path_str);
+    if let Ok(path_str) = java_src_path_str {
+        let path = Path::new(&path_str);
         statistic_file(path).await?;
     } else {
         debug!(
             "Variable de entorno 'JAVA_SRC' no encontrada. Usando código de constante para un solo análisis."
         );
-        let variables_count = Arc::new(AtomicUsize::new(0)); // Inicializa el contador global
-        let methods_count = Arc::new(AtomicUsize::new(0)); // Inicializa el contador global
+        let variables_count = Arc::new(AtomicUsize::new(0));
+        let methods_count = Arc::new(AtomicUsize::new(0));
         statistic(CODE, TypeQuery::Method(Arc::clone(&methods_count))).await?;
         statistic(CODE, TypeQuery::Variable(Arc::clone(&variables_count))).await?;
-        info!("Total de metodos encontradas: {}", methods_count.load(Ordering::SeqCst)); // Muestra el resultado final
-        info!("Total de variables encontradas: {}", variables_count.load(Ordering::SeqCst)); // Muestra el resultado final
+        info!("Total de metodos encontradas: {}", methods_count.load(Ordering::SeqCst));
+        info!("Total de variables encontradas: {}", variables_count.load(Ordering::SeqCst));
     }
 
     Ok(())

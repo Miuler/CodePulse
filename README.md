@@ -2,6 +2,8 @@
 # Statistic
 
 La aplicacion lee todos los archivos .java de un directorio y cuenta los metodos y variables.
+Lee todos los archivos que se encuentren en el directorio definido en la variable JAVA_SRC.
+Si no existe la variable lee el archivo .env para sacar todas las variables faltantes desde ese archivo.
 
 
 # Ejemplo de la salida del programa
