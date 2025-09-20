@@ -1,5 +1,6 @@
 mod statistic;
 
+use std::fs;
 use log::{info, debug};
 use opentelemetry::trace::TracerProvider;
 use tracing_subscriber::layer::SubscriberExt;
@@ -10,6 +11,7 @@ use dotenv::dotenv;
 use opentelemetry::global;
 use opentelemetry_sdk::propagation::TraceContextPropagator;
 use opentelemetry_otlp::WithExportConfig;
+use tokio::sync::Mutex;
 use tracing_subscriber::EnvFilter;
 use tracing_subscriber::filter::LevelFilter;
 use tracing_subscriber::util::SubscriberInitExt;
@@ -30,10 +32,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         debug!(
             "Variable de entorno 'JAVA_SRC' no encontrada. Usando código de constante para un solo análisis."
         );
+        let mut output_file = Arc::new(Mutex::new(fs::File::create("statistics.txt")?));
         let variables_count = Arc::new(AtomicUsize::new(0));
         let methods_count = Arc::new(AtomicUsize::new(0));
-        statistic(CODE, TypeQuery::Method(Arc::clone(&methods_count))).await?;
-        statistic(CODE, TypeQuery::Variable(Arc::clone(&variables_count))).await?;
+        statistic(CODE, TypeQuery::Method(Arc::clone(&methods_count)), "demo", Arc::clone(&output_file)).await?;
+        statistic(CODE, TypeQuery::Variable(Arc::clone(&variables_count)), "demo", output_file).await?;
         info!("Total de metodos encontradas: {}", methods_count.load(Ordering::SeqCst));
         info!("Total de variables encontradas: {}", variables_count.load(Ordering::SeqCst));
     }

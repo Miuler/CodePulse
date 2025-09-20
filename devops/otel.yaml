@@ -5,6 +5,7 @@ metadata:
 
 ---
 
+# $ operator-sdk olm install
 apiVersion: operators.coreos.com/v1
 kind: OperatorGroup
 metadata:
@@ -13,6 +14,7 @@ metadata:
 
 ---
 
+# https://operatorhub.io/install/opentelemetry-operator.yaml
 apiVersion: operators.coreos.com/v1alpha1
 kind: Subscription
 metadata:
@@ -21,6 +23,62 @@ metadata:
 spec:
   channel: alpha
   name: opentelemetry-operator
+  source: operatorhubio-catalog
+  sourceNamespace: olm
+
+---
+
+# https://operatorhub.io/install/tempo-operator.yaml
+apiVersion: operators.coreos.com/v1alpha1
+kind: Subscription
+metadata:
+  name: tempo-operator
+  namespace: op-otel
+spec:
+  channel: alpha
+  name: tempo-operator
+  source: operatorhubio-catalog
+  sourceNamespace: olm
+
+---
+
+# https://operatorhub.io/install/loki-operator.yaml
+apiVersion: operators.coreos.com/v1alpha1
+kind: Subscription
+metadata:
+  name: loki-operator
+  namespace: op-otel
+spec:
+  channel: alpha
+  name: loki-operator
+  source: operatorhubio-catalog
+  sourceNamespace: olm
+
+---
+
+# https://operatorhub.io/install/prometheus.yaml
+apiVersion: operators.coreos.com/v1alpha1
+kind: Subscription
+metadata:
+  name: prometheus-operator
+  namespace: op-otel
+spec:
+  channel: beta
+  name: prometheus
+  source: operatorhubio-catalog
+  sourceNamespace: olm
+
+---
+
+# https://operatorhub.io/install/grafana-operator.yaml
+apiVersion: operators.coreos.com/v1alpha1
+kind: Subscription
+metadata:
+  name: grafana-operator
+  namespace: op-otel
+spec:
+  channel: v5
+  name: grafana-operator
   source: operatorhubio-catalog
   sourceNamespace: olm
 
