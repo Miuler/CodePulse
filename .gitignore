@@ -2,3 +2,5 @@
 .idea
 *.lock
 .env
+*.csv
+*.txt
